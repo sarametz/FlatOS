@@ -5,21 +5,23 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 /**
+ * GCM Intent service
+ * Receives GCM intents
  * Created by Sara on 3/3/2015.
  */
 public class GCMIntentService extends IntentService {
     private static final String TAG = "GCMIntentService";
     public static final int NOTIFICATION_ID = 1;
-    private NotificationManager mNotificationManager;
-    NotificationCompat.Builder builder;
 
     public GCMIntentService() {
         super("GCMIntentService");
@@ -40,29 +42,20 @@ public class GCMIntentService extends IntentService {
              * any message types you're not interested in, or that you don't
              * recognize.
              */
-            if (GoogleCloudMessaging.
-                    MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-                sendNotification("Send error: " + extras.toString());
-            } else if (GoogleCloudMessaging.
-                    MESSAGE_TYPE_DELETED.equals(messageType)) {
-                sendNotification("Deleted messages on server: " +
-                        extras.toString());
-                // If it's a regular GCM message, do some work.
-            } else if (GoogleCloudMessaging.
-                    MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                // This loop represents the service doing some work.
-                for (int i=0; i<5; i++) {
-                    Log.i(TAG, "Working... " + (i + 1)
-                            + "/5 @ " + SystemClock.elapsedRealtime());
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    }
-                }
-                Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
-                // Post notification of received message.
-                sendNotification("Received: " + extras.toString());
-                Log.i(TAG, "Received: " + extras.toString());
+            switch (messageType){
+                case GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR:
+                    Log.d("GCM Send error: " , extras.toString());
+                    break;
+                case GoogleCloudMessaging.MESSAGE_TYPE_DELETED:
+                    Log.d("Deleted GCM messages:" ,extras.toString());
+                    break;
+                case GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE:
+                    // Post notification of received message.
+                    sendNotification("Someone Pressed the Doorbell", "Received: " + extras.toString());
+                    Log.i(TAG, "Received: " + extras.toString());
+                    break;
+                default:
+                    Log.e(TAG, "Unknown messageType "+messageType+": "+extras.toString());
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.
@@ -72,8 +65,8 @@ public class GCMIntentService extends IntentService {
     // Put the message into a notification and post it.
     // This is just one simple example of what you might choose to do with
     // a GCM message.
-    private void sendNotification(String msg) {
-        mNotificationManager = (NotificationManager)
+    private void sendNotification(String title, String msg) {
+        NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
@@ -81,11 +74,16 @@ public class GCMIntentService extends IntentService {
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_plusone_small_off_client)
-                        .setContentTitle("GCM Notification")
+                        .setSmallIcon(R.drawable.ic_stat_planet_express)
+                        .setContentTitle(title)
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
                         .setContentText(msg);
+
+        mBuilder.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
+        mBuilder.setLights(Color.CYAN, 3000, 3000);
+        Uri uri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        mBuilder.setSound(uri);
 
         mBuilder.setContentIntent(contentIntent);
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());

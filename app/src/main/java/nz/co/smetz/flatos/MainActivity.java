@@ -1,31 +1,27 @@
 package nz.co.smetz.flatos;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Looper;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
-import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -33,13 +29,9 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
@@ -50,8 +42,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -59,7 +49,6 @@ public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
     private static final String TAG = "FlatOS MainActivity";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    public static final String EXTRA_MESSAGE = "message";
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private static final String SERVER_URL = "https://arcane-springs-6803.herokuapp.com";
     private String token;
@@ -68,9 +57,7 @@ public class MainActivity extends ActionBarActivity
      */
     String SENDER_ID = "627763297645";
 
-    TextView mDisplay;
     GoogleCloudMessaging gcm;
-    AtomicInteger msgId = new AtomicInteger();
     SharedPreferences prefs;
     Context context;
 
@@ -102,7 +89,7 @@ public class MainActivity extends ActionBarActivity
         context = getApplicationContext();
 
         // Check user has token
-        prefs = getGCMPreferences(context);
+        prefs = getGCMPreferences();
         token = prefs.getString(getString(R.string.token_key), "");
         if(token.isEmpty()){
             Intent intent=new Intent(this,LoginActivity.class);
@@ -118,8 +105,6 @@ public class MainActivity extends ActionBarActivity
             Log.i(TAG, "Regid:"+regid);
             if (regid.isEmpty()) {
                 registerInBackground();
-            }else{
-                sendRegistrationIdToBackend();
             }
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
@@ -131,6 +116,12 @@ public class MainActivity extends ActionBarActivity
     protected void onResume() {
         super.onResume();
         checkPlayServices();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        gcm.close();
     }
 
     /**
@@ -162,7 +153,7 @@ public class MainActivity extends ActionBarActivity
      *         registration ID.
      */
     private String getRegistrationId(Context context) {
-        final SharedPreferences prefs = getGCMPreferences(context);
+        final SharedPreferences prefs = getGCMPreferences();
         String registrationId = prefs.getString(getString(R.string.reg_id_key), "");
         if (registrationId.isEmpty()) {
             Log.i(TAG, "Registration not found.");
@@ -197,7 +188,7 @@ public class MainActivity extends ActionBarActivity
     /**
      * @return Application's {@code SharedPreferences}.
      */
-    protected SharedPreferences getGCMPreferences(Context context) {
+    protected SharedPreferences getGCMPreferences() {
         // This sample app persists the registration ID in shared preferences, but
         // how you store the registration ID in your app is up to you.
         return getSharedPreferences(MainActivity.class.getSimpleName(),
@@ -214,7 +205,7 @@ public class MainActivity extends ActionBarActivity
         @Override
         protected String doInBackground(Object... params) {
             Log.d(TAG,"DOING IN BACKGROUND");
-            String msg = "";
+            String msg;
             try {
                 if (gcm == null) {
                     gcm = GoogleCloudMessaging.getInstance(context);
@@ -296,14 +287,9 @@ public class MainActivity extends ActionBarActivity
 
             @Override
             public void onGCMRegistered(String reg_id) {
-                Log.d(TAG, "Response From Asynchronous task:"+ (String) reg_id);
+                Log.d(TAG, "Response From Asynchronous task:"+ reg_id);
             }
         });
-        task.execute(null,null,null);
-    }
-
-    private void registerInBackground(OnGCMRegistered callback) {
-        GCMRegisterTask task = new GCMRegisterTask(callback);
         task.execute(null,null,null);
     }
 
@@ -315,7 +301,7 @@ public class MainActivity extends ActionBarActivity
      * @param regId registration ID
      */
     private void storeRegistrationId(Context context, String regId) {
-        final SharedPreferences prefs = getGCMPreferences(context);
+        final SharedPreferences prefs = getGCMPreferences();
         int appVersion = getAppVersion(context);
         Log.i(TAG, "Saving regId on app version " + appVersion);
         SharedPreferences.Editor editor = prefs.edit();
@@ -381,10 +367,10 @@ public class MainActivity extends ActionBarActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
+        if (id == R.id.action_settings) {
+            //TODO show pref fragment here
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
