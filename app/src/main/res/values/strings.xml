@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">FlatOS</string>
+    <string name="server_url">https://arcane-springs-6803.herokuapp.com</string>
+    <string name="token_key">token</string>
+
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_settings">Account</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_example">Example action</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="notification_settings">Notifications</string>
+    <string name="reg_id_key">pref_reg_id</string>
+    <string name="reg_id_title">GCM Registration ID</string>
+    <string name="reg_id_summary">Google Cloud Messaging Registration ID Goes HERE</string>
+</resources>
