@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">FlatOS</string>
-    <string name="server_url">https://arcane-springs-6803.herokuapp.com</string>
     <string name="token_key">token</string>
 
-    <string name="title_section1">Section 1</string>
+    <string name="title_update_list">Updates</string>
     <string name="title_section2">Section 2</string>
     <string name="title_settings">Account</string>
 

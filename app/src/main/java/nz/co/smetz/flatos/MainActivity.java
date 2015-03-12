@@ -3,6 +3,7 @@ package nz.co.smetz.flatos;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.ListFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -46,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, UpdateFragment.OnFragmentInteractionListener {
     private static final String TAG = "FlatOS MainActivity";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final String PROPERTY_APP_VERSION = "appVersion";
@@ -58,8 +59,8 @@ public class MainActivity extends ActionBarActivity
     String SENDER_ID = "627763297645";
 
     GoogleCloudMessaging gcm;
-    SharedPreferences prefs;
     Context context;
+    FlatOSUtils utils = FlatOSUtils.INSTANCE;
 
     private String regid;
     /**
@@ -89,14 +90,9 @@ public class MainActivity extends ActionBarActivity
         context = getApplicationContext();
 
         // Check user has token
-        prefs = getGCMPreferences();
-        token = prefs.getString(getString(R.string.token_key), "");
-        if(token.isEmpty()){
-            Intent intent=new Intent(this,LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
-
+        getGCMPreferences();
+        token = utils.getToken(this);
+        Log.d(TAG, "onCreate Token:"+token);
         // Check device for Play Services APK. If check succeeds, proceed with
         //  GCM registration.
         if (checkPlayServices()) {
@@ -105,6 +101,8 @@ public class MainActivity extends ActionBarActivity
             Log.i(TAG, "Regid:"+regid);
             if (regid.isEmpty()) {
                 registerInBackground();
+//            }else{
+//                sendRegistrationIdToBackend();
             }
         } else {
             Log.i(TAG, "No valid Google Play Services APK found.");
@@ -191,8 +189,18 @@ public class MainActivity extends ActionBarActivity
     protected SharedPreferences getGCMPreferences() {
         // This sample app persists the registration ID in shared preferences, but
         // how you store the registration ID in your app is up to you.
-        return getSharedPreferences(MainActivity.class.getSimpleName(),
+        if (utils.getPrefs() != null){
+            return utils.getPrefs();
+        }
+        SharedPreferences prefs = getSharedPreferences(MainActivity.class.getSimpleName(),
                 Context.MODE_PRIVATE);
+        utils.setPrefs(prefs);
+        return prefs;
+    }
+
+    @Override
+    public void onFragmentInteraction(String id) {
+        Log.d(TAG, "onFragmentInteraction id:"+id);
     }
 
     public class GCMRegisterTask extends AsyncTask<Object, Void, String> {
@@ -241,7 +249,7 @@ public class MainActivity extends ActionBarActivity
                 HttpResponse response;
                 JSONObject json = new JSONObject();
                 try {
-                    HttpPost post = new HttpPost(SERVER_URL + "/register/");
+                    HttpPost post = new HttpPost(FlatOSUtils.getDevice_url());
 
                     post.setHeader("Authorization","Token "+token);
                     post.setHeader("Www-Authenticate","Token "+token);
@@ -314,27 +322,37 @@ public class MainActivity extends ActionBarActivity
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getFragmentManager();
-        if (position == 2){
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, new PrefFragment())
-                    .commit();
-        }else{
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                    .commit();
+        Fragment f;
+        Log.d(TAG, "NavDrawerItemSelected "+position);
+        switch (position){
+            case 0:
+                Log.d(TAG, "Create Update fragment");
+                f = UpdateFragment.newInstance();
+                break;
+            case 2:
+                Log.d(TAG, "Create Pref fragment");
+                f = PrefFragment.newInstance();
+                break;
+            default:
+                Log.d(TAG, "Create default fragment");
+                f = PlaceholderFragment.newInstance(position + 1);
+                break;
         }
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, f)
+                .commit();
+
+    }
+
+    public void setTitle(String title){
+        Log.d(TAG, "Set Activity title "+title);
+        mTitle = title;
     }
 
     public void onSectionAttached(int number) {
         switch (number) {
-            case 1:
-                mTitle = getString(R.string.title_section1);
-                break;
             case 2:
                 mTitle = getString(R.string.title_section2);
-                break;
-            case 3:
-                mTitle = getString(R.string.title_settings);
                 break;
         }
     }
@@ -414,45 +432,5 @@ public class MainActivity extends ActionBarActivity
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
     }
-
-    public static class PrefFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener{
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            // Load the preferences from an XML resource
-            addPreferencesFromResource(R.xml.preferences);
-        }
-
-        @Override
-        public void onResume() {
-            super.onResume();
-            getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-
-        }
-
-        @Override
-        public void onPause() {
-            getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
-            super.onPause();
-        }
-
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-                                              String key) {
-            Log.d(TAG,"onSHaredPRefsChanged:"+key);
-            if (key.equals(getString(R.string.reg_id_key))) {
-                Preference gcmIdPref = findPreference(getString(R.string.reg_id_key));
-                // Set summary to be the user-description for the selected value
-                gcmIdPref.setSummary(sharedPreferences.getString(key, ""));
-                Log.d(TAG,"gcmIdPref:"+gcmIdPref.getSummary());
-            }
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(3);
-        }
-    }
-
 
 }

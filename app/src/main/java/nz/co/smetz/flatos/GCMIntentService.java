@@ -51,7 +51,7 @@ public class GCMIntentService extends IntentService {
                     break;
                 case GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE:
                     // Post notification of received message.
-                    sendNotification("Someone Pressed the Doorbell", "Received: " + extras.toString());
+                    sendNotification(extras.getString("message",""));
                     Log.i(TAG, "Received: " + extras.toString());
                     break;
                 default:
@@ -65,7 +65,7 @@ public class GCMIntentService extends IntentService {
     // Put the message into a notification and post it.
     // This is just one simple example of what you might choose to do with
     // a GCM message.
-    private void sendNotification(String title, String msg) {
+    private void sendNotification(String title) {
         NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -77,8 +77,8 @@ public class GCMIntentService extends IntentService {
                         .setSmallIcon(R.drawable.ic_stat_planet_express)
                         .setContentTitle(title)
                         .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText(msg))
-                        .setContentText(msg);
+                                .bigText(""))
+                        .setContentText("");
 
         mBuilder.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
         mBuilder.setLights(Color.CYAN, 3000, 3000);
