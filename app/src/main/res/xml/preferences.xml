@@ -3,9 +3,29 @@
     <PreferenceCategory
         android:title="@string/notification_settings"
         android:key="pref_key_notification_settings">
-        <Preference
-            android:key="@string/reg_id_key"
-            android:title="@string/reg_id_title"
-            android:summary="@string/reg_id_summary" />
+        <CheckBoxPreference
+            android:key="notifications"
+            android:title="@string/notification_title"
+            android:defaultValue="true" />
+
+        <RingtonePreference
+            android:key="notification_tone"
+            android:title="@string/notification_tone_title"
+            android:defaultValue="content://settings/system/notification_sound"
+            android:showDefault="true"/>
+
+        <CheckBoxPreference
+            android:key="notification_vibrate"
+            android:title="@string/notification_vibrate_title"
+            android:defaultValue="true"/>
+
+        <ListPreference
+            android:key="notification_limit_wifi"
+            android:title="@string/notification_limit_wifi_title"
+            android:summary="@string/notification_limit_wifi_summ"
+            android:entries="@array/wifi_entries"
+            android:entryValues="@array/wifi_entry_values"
+            android:dialogTitle="@string/notification_limit_wifi_dialog_title"/>
+
     </PreferenceCategory>
 </PreferenceScreen>

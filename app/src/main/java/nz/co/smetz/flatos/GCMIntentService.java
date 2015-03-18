@@ -5,10 +5,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -68,25 +70,37 @@ public class GCMIntentService extends IntentService {
     private void sendNotification(String title) {
         NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Log.d(TAG, "Notifications: "+prefs.getBoolean("notifications", true)+"\n vibrate:"+prefs.getBoolean("notification_vibrate",true));
+        Log.d(TAG, "Sound: "+prefs.getString("notification_tone", ""));
+        if (prefs.getBoolean("notifications", true)) {
+            Log.d(TAG, "Notifications on");
+            PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                    new Intent(this, MainActivity.class), 0);
 
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), 0);
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.drawable.ic_stat_planet_express)
+                            .setContentTitle(title)
+                            .setStyle(new NotificationCompat.BigTextStyle()
+                                    .bigText(""))
+                            .setContentText("");
+            mBuilder.setLights(Color.CYAN, 3000, 3000);
+            if (prefs.getBoolean("notification_vibrate", true)) {
+                mBuilder.setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});
+            } else {
+                Log.d(TAG, "Vibrate OFF");
+            }
+            String tone = prefs.getString("notification_tone", "");
+            Log.d(TAG, "Tone:"+tone);
+            Uri uri = Uri.parse(tone);
+            mBuilder.setSound(uri);
 
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_stat_planet_express)
-                        .setContentTitle(title)
-                        .setStyle(new NotificationCompat.BigTextStyle()
-                                .bigText(""))
-                        .setContentText("");
-
-        mBuilder.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
-        mBuilder.setLights(Color.CYAN, 3000, 3000);
-        Uri uri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        mBuilder.setSound(uri);
-
-        mBuilder.setContentIntent(contentIntent);
-        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+            mBuilder.setContentIntent(contentIntent);
+            mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        } else {
+            Log.d(TAG, "Not sending notification as notifications OFF");
+        }
     }
 }
 

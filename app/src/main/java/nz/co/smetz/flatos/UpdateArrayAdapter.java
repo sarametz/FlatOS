@@ -16,28 +16,9 @@ public class UpdateArrayAdapter extends ArrayAdapter<Update> {
     private List<Update> itemList;
     private Context context;
 
-    public UpdateArrayAdapter(List<Update> itemList, Context ctx) {
-        super(ctx, android.R.layout.simple_list_item_1, itemList);
-        this.itemList = itemList;
+    public UpdateArrayAdapter(Context ctx) {
+        super(ctx, R.layout.update_list_item);
         this.context = ctx;
-    }
-
-    public int getCount() {
-        if (itemList != null)
-            return itemList.size();
-        return 0;
-    }
-
-    public Update getItem(int position) {
-        if (itemList != null)
-            return itemList.get(position);
-        return null;
-    }
-
-    public long getItemId(int position) {
-        if (itemList != null)
-            return itemList.get(position).hashCode();
-        return 0;
     }
 
     @Override
@@ -49,7 +30,7 @@ public class UpdateArrayAdapter extends ArrayAdapter<Update> {
             v = inflater.inflate(R.layout.update_list_item, null);
         }
 
-        Update u = itemList.get(position);
+        Update u = getItem(position);
         TextView text = (TextView) v.findViewById(R.id.messageTextView);
         text.setText(u.getMessage());
 
@@ -59,12 +40,13 @@ public class UpdateArrayAdapter extends ArrayAdapter<Update> {
         return v;
     }
 
-    public List<Update> getData() {
-        return itemList;
-    }
-
     public void setData(List<Update> itemList) {
-        this.itemList = itemList;
+        clear();
+        if (itemList != null) {
+            for(Update u: itemList){
+                add(u);
+            }
+        }
     }
 
 }

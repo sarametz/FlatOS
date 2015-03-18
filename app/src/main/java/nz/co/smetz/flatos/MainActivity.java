@@ -331,7 +331,7 @@ public class MainActivity extends ActionBarActivity
                 break;
             case 2:
                 Log.d(TAG, "Create Pref fragment");
-                f = PrefFragment.newInstance();
+                f = PrefFragment.newInstance(this);
                 break;
             default:
                 Log.d(TAG, "Create default fragment");
@@ -386,7 +386,10 @@ public class MainActivity extends ActionBarActivity
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
-            //TODO show pref fragment here
+            Log.d(TAG, "settings Selected ");
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.container, PrefFragment.newInstance(this))
+                    .commit();
             return true;
         }
 

@@ -40,7 +40,7 @@ public class Update {
         this.actor = actor;
         this.type = type;
         this.message = message;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
         try {
             this.time = sdf.parse(time);
         } catch (ParseException e) {

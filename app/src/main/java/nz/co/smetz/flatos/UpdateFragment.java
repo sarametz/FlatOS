@@ -51,7 +51,7 @@ public class UpdateFragment extends ListFragment implements LoaderManager.Loader
         Log.d(TAG, "onActivityCreated");
         setEmptyText("No updates");
 
-        mAdapter = new UpdateArrayAdapter(new ArrayList<Update>(), getActivity());
+        mAdapter = new UpdateArrayAdapter(getActivity());
         setListAdapter(mAdapter);
         // Start out with a progress indicator.
         setListShown(false);
@@ -130,12 +130,15 @@ public class UpdateFragment extends ListFragment implements LoaderManager.Loader
      */
     @Override
     public void onLoadFinished(Loader<List<Update>> arg0, List<Update> data) {
-        mAdapter.setData(data);
-        // The list should now be shown.
-        if (isResumed()) {
-            setListShown(true);
-        } else {
-            setListShownNoAnimation(true);
+        if (data != null) {
+            mAdapter.setData(data);
+            Log.d(TAG, "Data:" + data.toString());
+            // The list should now be shown.
+            if (isResumed()) {
+                setListShown(true);
+            } else {
+                setListShownNoAnimation(true);
+            }
         }
     }
     /**

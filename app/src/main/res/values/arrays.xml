@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="wifi_entries">
+        <item>None</item>
+    </array>
+    <array name="wifi_entry_values">
+        <item>None</item>
+    </array>
+</resources>
