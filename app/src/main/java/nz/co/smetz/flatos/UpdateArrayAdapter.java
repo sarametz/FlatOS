@@ -1,51 +1,54 @@
 package nz.co.smetz.flatos;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Sara on 9/3/2015.
  */
-public class UpdateArrayAdapter extends ArrayAdapter<Update> {
-    private List<Update> itemList;
+public class UpdateArrayAdapter extends RecyclerView.Adapter<UpdateHolder> {
+    private List<Update> updateList;
     private Context context;
 
     public UpdateArrayAdapter(Context ctx) {
-        super(ctx, R.layout.update_list_item);
+        updateList = new ArrayList<Update>();
         this.context = ctx;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public int getItemCount() {
+        return updateList.size();
+    }
 
-        View v = convertView;
-        if (v == null) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            v = inflater.inflate(R.layout.update_list_item, null);
-        }
+    @Override
+    public void onBindViewHolder(UpdateHolder updateHolder, int i) {
+        Update u = updateList.get(i);
+        updateHolder.vMessage.setText(u.getMessage());
+        updateHolder.vTime.setText(u.getTime());
+    }
 
-        Update u = getItem(position);
-        TextView text = (TextView) v.findViewById(R.id.messageTextView);
-        text.setText(u.getMessage());
+    @Override
+    public UpdateHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        View itemView = LayoutInflater.
+                from(viewGroup.getContext()).
+                inflate(R.layout.update_list_item, viewGroup, false);
 
-        TextView text1 = (TextView) v.findViewById(R.id.timeTextView);
-        text1.setText(u.getTime().toString());;
-
-        return v;
+        return new UpdateHolder(itemView);
     }
 
     public void setData(List<Update> itemList) {
-        clear();
+        updateList.clear();
         if (itemList != null) {
             for(Update u: itemList){
-                add(u);
+                updateList.add(u);
             }
+            this.notifyDataSetChanged();
         }
     }
 

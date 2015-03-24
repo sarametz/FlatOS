@@ -11,8 +11,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -51,16 +53,16 @@ public class AsyncUpdateListLoader extends AsyncTaskLoader<List<Update>> {
                 InputStream is = conn.getInputStream();
 
                 // Read the stream
-                byte[] b = new byte[1024];
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                BufferedReader r = new BufferedReader(new InputStreamReader(is));
+                StringBuilder response = new StringBuilder();
+                String line;
 
-                while ( is.read(b) != -1)
-                    outputStream.write(b);
+                while ((line = r.readLine()) != null){
+                    response.append(line);
+                }
+                Log.d(TAG, "JSONResponse:"+response.toString());
 
-                String JSONResp = new String(outputStream.toByteArray());
-                Log.d(TAG, "JSONResponse:"+JSONResp);
-
-                JSONArray arr = new JSONArray(JSONResp);
+                JSONArray arr = new JSONArray(response.toString());
                 for (int i=0; i < arr.length(); i++) {
                     result.add(convertUpdate(arr.getJSONObject(i)));
                 }

@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -71,9 +73,11 @@ public class GCMIntentService extends IntentService {
         NotificationManager mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        Log.d(TAG, "Notifications: "+prefs.getBoolean("notifications", true)+"\n vibrate:"+prefs.getBoolean("notification_vibrate",true));
-        Log.d(TAG, "Sound: "+prefs.getString("notification_tone", ""));
-        if (prefs.getBoolean("notifications", true)) {
+        WifiManager wm = (WifiManager)this.getSystemService(Context.WIFI_SERVICE);
+        String currWifi = wm.getConnectionInfo().getSSID().substring(1,wm.getConnectionInfo().getSSID().length()-1);
+        String wifiSetting = prefs.getString("notification_limit_wifi", "None");
+        Log.d(TAG, "Wifi Setting SSID:"+wifiSetting+" current:"+currWifi);
+        if (prefs.getBoolean("notifications", true) && (currWifi.equals(wifiSetting) || wifiSetting.equals("None"))) {
             Log.d(TAG, "Notifications on");
             PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                     new Intent(this, MainActivity.class), 0);
@@ -99,7 +103,7 @@ public class GCMIntentService extends IntentService {
             mBuilder.setContentIntent(contentIntent);
             mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
         } else {
-            Log.d(TAG, "Not sending notification as notifications OFF");
+            Log.d(TAG, "Not sending notification as notifications OFF or not connected to "+wifiSetting);
         }
     }
 }

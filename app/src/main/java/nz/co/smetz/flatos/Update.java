@@ -1,5 +1,8 @@
 package nz.co.smetz.flatos;
 
+import android.text.format.DateUtils;
+
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,8 +32,8 @@ public class Update {
         return message;
     }
 
-    public Date getTime() {
-        return time;
+    public String getTime() {
+        return DateUtils.formatSameDayTime(time.getTime(),System.currentTimeMillis(), DateFormat.SHORT,DateFormat.LONG).toString();
     }
 
     public Date time;

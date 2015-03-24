@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="material_blue_grey_900">#163238</color>
+    <color name="material_blue_grey_800">#FF37474F</color>
+    <color name="material_blue_grey_700">#FF455A64</color>
+    <color name="material_blue_grey_500">#FF607D8B</color>
+    <color name="material_blue_grey_100">#FFCFD8DC</color>
+
+
+    <color name="material_teal_900">#FF004D40</color>
+    <color name="material_teal_800">#FF00695C</color>
+    <color name="material_teal_700">#FF00796B</color>
+    <color name="material_teal_500">#FF009688</color>
+    <color name="material_teal_100">#FFB2DFDB</color>
+
+    <color name="material_teal_A400">#FF1DE9B6</color>
+    <color name="material_teal_A200">#FF64FFDA</color>
+    <color name="material_teal_A100">#FFA7FFEB</color>
+
+</resources>

@@ -1,11 +1,14 @@
 package nz.co.smetz.flatos;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Loader;
 import android.os.Bundle;
 import android.app.ListFragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,11 +29,13 @@ import nz.co.smetz.flatos.dummy.DummyContent;
  * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
  * interface.
  */
-public class UpdateFragment extends ListFragment implements LoaderManager.LoaderCallbacks<List<Update>>{
+public class UpdateFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Update>>{
 
     private static final String TAG = "UpdateFragment";
     private UpdateArrayAdapter mAdapter;
     private OnFragmentInteractionListener mListener;
+    private RecyclerView mUpdateview;
+    private LinearLayoutManager mLayoutManager;
 
     public static UpdateFragment newInstance() {
         Log.d(TAG, "new Instance");
@@ -46,15 +51,26 @@ public class UpdateFragment extends ListFragment implements LoaderManager.Loader
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+        //inflate the layout for this fragment
+        View rootView = inflater.inflate(R.layout.fragment_update_list,
+                container, false);
+
+        //set the adapter to load the gridview data
+        mUpdateview = (RecyclerView) rootView.findViewById(R.id.updateview);
+        mAdapter = new UpdateArrayAdapter(getActivity());
+        mUpdateview.setAdapter(mAdapter);
+
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mUpdateview.setLayoutManager(mLayoutManager);
+        return rootView;
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Log.d(TAG, "onActivityCreated");
-        setEmptyText("No updates");
 
-        mAdapter = new UpdateArrayAdapter(getActivity());
-        setListAdapter(mAdapter);
-        // Start out with a progress indicator.
-        setListShown(false);
         // Prepare the loader.  Either re-connect with an existing one,
         // or start a new one.
         getLoaderManager().initLoader(0, null, this);
@@ -90,17 +106,6 @@ public class UpdateFragment extends ListFragment implements LoaderManager.Loader
         mListener = null;
     }
 
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-        Log.i("FragmentUpdateList", "Item clicked: " + id);
-        if (null != mListener) {
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(((Update)l.getItemAtPosition(position)).getId());
-        }
-    }
-
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -133,12 +138,6 @@ public class UpdateFragment extends ListFragment implements LoaderManager.Loader
         if (data != null) {
             mAdapter.setData(data);
             Log.d(TAG, "Data:" + data.toString());
-            // The list should now be shown.
-            if (isResumed()) {
-                setListShown(true);
-            } else {
-                setListShownNoAnimation(true);
-            }
         }
     }
     /**
